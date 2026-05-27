@@ -3,6 +3,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.user import User
+from app.models.folder import Folder
 from app.schemas.user import UserCreate, UserResponse, Token
 from app.core.security import hash_password, verify_password, create_access_token, decode_access_token
 
@@ -19,6 +20,13 @@ def register(payload: UserCreate, db: Session = Depends(get_db)):
         hashed_password=hash_password(payload.password)
     )
     db.add(user)
+    db.flush()  # gets user.id without committing
+    root_folder = Folder(
+        name="My Drive",
+        owner_id=user.id,
+        parent_id=None
+    )
+    db.add(root_folder)
     db.commit()
     db.refresh(user)
     return user
