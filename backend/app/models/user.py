@@ -14,3 +14,5 @@ class User(Base):
 
     folders = relationship("Folder", back_populates="owner")
     files = relationship("File", back_populates="owner")
+    shares_created = relationship("Share", foreign_keys="Share.owner_id", back_populates="owner")
+    shares_received = relationship("Share", foreign_keys="Share.shared_with_id", back_populates="shared_with")
