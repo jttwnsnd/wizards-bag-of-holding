@@ -13,3 +13,4 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     folders = relationship("Folder", back_populates="owner")
+    files = relationship("File", back_populates="owner")

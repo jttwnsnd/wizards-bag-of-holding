@@ -20,6 +20,7 @@ services:
       - ./backend/.env
     depends_on:
       - db
+      - minio
     volumes:
       - ./backend:/app
 
@@ -35,6 +36,19 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
+  
+  minio:
+    image: minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
 
 volumes:
   postgres_data:
+  minio_data:
