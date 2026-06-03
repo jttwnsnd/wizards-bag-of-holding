@@ -32,7 +32,7 @@ export default function DriveView() {
         <Breadcrumb breadcrumbs={breadcrumbs} onNavigate={navigateToBreadcrumb} />
         <button
           onClick={() => fileInputRef.current?.click()}
-          className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+          className="flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
         >
           <span>⬆️</span> Upload
         </button>

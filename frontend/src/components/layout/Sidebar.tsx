@@ -29,7 +29,7 @@ export default function Sidebar() {
           <div className="text-xs text-gray-500 mb-2">Storage</div>
           <div className="w-full bg-gray-700 rounded-full h-1.5">
             <div
-              className="bg-indigo-500 h-1.5 rounded-full transition-all duration-500"
+              className="bg-violet-500 h-1.5 rounded-full transition-all duration-500"
               style={{ width: `${percentage}%` }}
             />
           </div>

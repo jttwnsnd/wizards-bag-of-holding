@@ -49,7 +49,7 @@ export default function LoginPage() {
               value={email}
               onChange={e => setEmail(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="bg-gray-800 border border-gray-700 text-white text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-indigo-500 transition-colors"
+              className="bg-gray-800 border border-gray-700 text-white text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-violet-500 transition-colors"
               placeholder="wizard@example.com"
             />
           </div>
@@ -61,7 +61,7 @@ export default function LoginPage() {
               value={password}
               onChange={e => setPassword(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="bg-gray-800 border border-gray-700 text-white text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-indigo-500 transition-colors"
+              className="bg-gray-800 border border-gray-700 text-white text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-violet-500 transition-colors"
               placeholder="••••••••"
             />
           </div>
@@ -69,7 +69,7 @@ export default function LoginPage() {
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+            className="bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
           >
             {loading ? 'Signing in...' : 'Sign in'}
           </button>
