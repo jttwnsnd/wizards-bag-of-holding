@@ -113,3 +113,9 @@ def delete_file(file_id: UUID, current_user: User = Depends(get_current_user), d
     delete_object(file.s3_key)
     db.delete(file)
     db.commit()
+
+@router.get("/storage", response_model=dict)
+def get_storage_usage(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    from sqlalchemy import func
+    total = db.query(func.sum(File.size)).filter(File.owner_id == current_user.id).scalar()
+    return {"used": total or 0}
