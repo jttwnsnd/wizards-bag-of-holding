@@ -1,24 +1,33 @@
 import { useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
 
-interface LoginPageProps {
-  onSwitchToRegister: () => void
+interface RegisterPageProps {
+  onSwitchToLogin: () => void
 }
 
-export default function LoginPage({ onSwitchToRegister }: LoginPageProps) {
-  const { login } = useAuth()
+export default function RegisterPage({ onSwitchToLogin }: RegisterPageProps) {
+  const { register } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirm, setConfirm] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
   const handleSubmit = async () => {
     setError('')
+    if (password !== confirm) {
+      setError('Passwords do not match')
+      return
+    }
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters')
+      return
+    }
     setLoading(true)
     try {
-      await login(email, password)
-    } catch {
-      setError('Invalid email or password')
+      await register(email, password)
+    } catch (err: any) {
+      setError(err.message || 'Registration failed')
     } finally {
       setLoading(false)
     }
@@ -35,7 +44,7 @@ export default function LoginPage({ onSwitchToRegister }: LoginPageProps) {
         <div className="text-center mb-8">
           <div className="text-5xl mb-3">🧙</div>
           <h1 className="text-white text-2xl font-bold">Bag of Holding</h1>
-          <p className="text-gray-500 text-sm mt-1">Sign in to your drive</p>
+          <p className="text-gray-500 text-sm mt-1">Create your account</p>
         </div>
 
         {/* Card */}
@@ -70,20 +79,33 @@ export default function LoginPage({ onSwitchToRegister }: LoginPageProps) {
             />
           </div>
 
+          <div className="flex flex-col gap-1">
+            <label className="text-gray-400 text-xs font-medium">Confirm Password</label>
+            <input
+              type="password"
+              value={confirm}
+              onChange={e => setConfirm(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="bg-gray-800 border border-gray-700 text-white text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-violet-500 transition-colors"
+              placeholder="••••••••"
+            />
+          </div>
+
           <button
             onClick={handleSubmit}
             disabled={loading}
             className="bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
           >
-            {loading ? 'Signing in...' : 'Sign in'}
+            {loading ? 'Creating account...' : 'Create account'}
           </button>
+
           <p className="text-center text-xs text-gray-500">
-            Don't have an account?{' '}
+            Already have an account?{' '}
             <button
-              onClick={onSwitchToRegister}
+              onClick={onSwitchToLogin}
               className="text-violet-400 hover:text-violet-300 transition-colors"
             >
-              Create one
+              Sign in
             </button>
           </p>
         </div>
