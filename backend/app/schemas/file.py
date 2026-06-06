@@ -38,3 +38,18 @@ class FileResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class SearchRequest(BaseModel):
+    query: str
+    limit: int = 10
+
+class SearchResult(BaseModel):
+    id: UUID
+    name: str
+    mime_type: str
+    size: int
+    created_at: datetime
+    similarity: float
+
+    class Config:
+        from_attributes = True

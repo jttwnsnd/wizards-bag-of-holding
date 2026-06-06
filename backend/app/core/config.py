@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     S3_ACCESS_KEY: str
     S3_SECRET_KEY: str
     S3_BUCKET: str
+    OLLAMA_URL: str = "http://ollama:11434"
 
     class Config:
         env_file = ".env"

@@ -1,6 +1,7 @@
 from sqlalchemy import Column, String, DateTime, ForeignKey, BigInteger, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
+from pgvector.sqlalchemy import Vector
 import uuid
 from app.database import Base
 
@@ -15,6 +16,7 @@ class File(Base):
     size = Column(BigInteger, nullable=False)
     mime_type = Column(String, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    embedding = Column(Vector(768), nullable=True)
 
     owner = relationship("User", back_populates="files")
     folder = relationship("Folder", back_populates="files")

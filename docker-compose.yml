@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:16
+    image: pgvector/pgvector:pg16
     restart: always
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
@@ -21,6 +21,7 @@ services:
     depends_on:
       - db
       - minio
+      - ollama
     volumes:
       - ./backend:/app
 
@@ -36,7 +37,7 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
-  
+
   minio:
     image: minio/minio
     ports:
@@ -50,6 +51,14 @@ services:
     volumes:
       - minio_data:/data
 
+  ollama:
+    image: ollama/ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+
 volumes:
   postgres_data:
   minio_data:
+  ollama_data:

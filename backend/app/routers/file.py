@@ -1,13 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 from uuid import UUID, uuid4
+from app.core.embeddings import generate_embedding, build_file_text
 from app.database import get_db
 from app.models.file import File
 from app.models.folder import Folder
 from app.schemas.file import (
     UploadInitRequest, UploadInitResponse,
     UploadCompleteRequest, FileResponse,
-    FileRename, FileMove
+    FileRename, FileMove, SearchRequest, SearchResult
 )
 from app.routers.auth import get_current_user
 from app.models.user import User
@@ -29,20 +31,30 @@ def upload_init(payload: UploadInitRequest, current_user: User = Depends(get_cur
     return {"presigned_url": presigned_url, "s3_key": s3_key}
 
 @router.post("/upload/complete", response_model=FileResponse, status_code=status.HTTP_201_CREATED)
-def upload_complete(payload: UploadCompleteRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+async def upload_complete(payload: UploadCompleteRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     folder = db.query(Folder).filter(
         Folder.id == payload.folder_id,
         Folder.owner_id == current_user.id
     ).first()
     if not folder:
         raise HTTPException(status_code=404, detail="Folder not found")
+
+    # Generate embedding for semantic search
+    try:
+        text = build_file_text(payload.filename, payload.mime_type)
+        embedding = await generate_embedding(text)
+    except Exception as e:
+        print(f"Warning: failed to generate embedding: {e}")
+        embedding = None
+
     file = File(
         name=payload.filename,
         owner_id=current_user.id,
         folder_id=payload.folder_id,
         s3_key=payload.s3_key,
         size=payload.size,
-        mime_type=payload.mime_type
+        mime_type=payload.mime_type,
+        embedding=embedding
     )
     db.add(file)
     db.commit()
@@ -119,3 +131,44 @@ def get_storage_usage(current_user: User = Depends(get_current_user), db: Sessio
     from sqlalchemy import func
     total = db.query(func.sum(File.size)).filter(File.owner_id == current_user.id).scalar()
     return {"used": total or 0}
+
+@router.post("/search", response_model=list[SearchResult])
+async def search_files(
+    payload: SearchRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    try:
+        query_embedding = await generate_embedding(payload.query)
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"Embedding service unavailable: {e}")
+
+    results = db.execute(
+        text("""
+            SELECT id, name, mime_type, size, created_at,
+                   1 - (embedding <=> :embedding) AS similarity
+            FROM files
+            WHERE owner_id = :owner_id
+              AND embedding IS NOT NULL
+              AND 1 - (embedding <=> :embedding) > 0.5
+            ORDER BY embedding <=> :embedding
+            LIMIT :limit
+        """),
+        {
+            "embedding": str(query_embedding),
+            "owner_id": str(current_user.id),
+            "limit": payload.limit
+        }
+    ).fetchall()
+
+    return [
+        SearchResult(
+            id=row.id,
+            name=row.name,
+            mime_type=row.mime_type,
+            size=row.size,
+            created_at=row.created_at,
+            similarity=row.similarity
+        )
+        for row in results
+    ]
