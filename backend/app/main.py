@@ -6,7 +6,7 @@ app = FastAPI(title="Wizard's Bag of Holding")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["http://localhost:5173", str(settings.FRONTEND_URL)],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
