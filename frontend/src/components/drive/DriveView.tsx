@@ -1,9 +1,10 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import FileGrid from './FileGrid'
 import DropZone from './DropZone'
 import Breadcrumb from './Breadcrumb'
 import SearchBar from './SearchBar'
 import SkeletonGrid from '../ui/SkeletonGrid'
+import NewFolderModal from './NewFolderModal'
 import { useDrive } from '../../hooks/useDrive'
 import { useSearch } from '../../hooks/useSearch'
 
@@ -18,6 +19,7 @@ function getFileIcon(mimeType: string): string {
 
 export default function DriveView() {
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [showNewFolder, setShowNewFolder] = useState(false)
   const {
     currentFolderId,
     breadcrumbs,
@@ -30,7 +32,6 @@ export default function DriveView() {
   } = useDrive()
 
   const { search, clearSearch, results, searching } = useSearch()
-
   const isSearching = results !== null
 
   if (!currentFolderId) {
@@ -50,6 +51,12 @@ export default function DriveView() {
         {!isSearching && (
           <Breadcrumb breadcrumbs={breadcrumbs} onNavigate={navigateToBreadcrumb} />
         )}
+        <button
+          onClick={() => setShowNewFolder(true)}
+          className="flex items-center gap-2 bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors shrink-0"
+        >
+          <span>📁</span> New Folder
+        </button>
         <button
           onClick={() => fileInputRef.current?.click()}
           className="flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors shrink-0"
@@ -107,6 +114,15 @@ export default function DriveView() {
             />
           )}
         </DropZone>
+      )}
+
+      {/* New Folder Modal */}
+      {showNewFolder && (
+        <NewFolderModal
+          parentFolderId={currentFolderId}
+          onSuccess={refresh}
+          onClose={() => setShowNewFolder(false)}
+        />
       )}
     </div>
   )

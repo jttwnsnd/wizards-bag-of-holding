@@ -16,17 +16,38 @@ export default function FolderCard({ id, name, onClick, onDelete }: FolderCardPr
 
   const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation()
-    if (!confirm(`Delete "${name}" and all its contents?`)) return
     try {
-      const res = await fetch(`${API_URL}/folders/${id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      if (!res.ok) throw new Error('Failed to delete folder')
-      showSuccess(`${name} deleted`)
-      onDelete()
+        // Check contents before confirming
+        const [foldersRes, filesRes] = await Promise.all([
+            fetch(`${API_URL}/folders/${id}/contents`, {
+                headers: { Authorization: `Bearer ${token}` }
+            }),
+            fetch(`${API_URL}/files/folder/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+        ])
+
+        const [subfolders, files] = await Promise.all([
+            foldersRes.json(),
+            filesRes.json()
+        ])
+
+        const totalItems = subfolders.length + files.length
+        const message = totalItems > 0
+        ? `"${name}" contains ${totalItems} item${totalItems !== 1 ? 's' : ''}. Deleting it will permanently remove all contents. Continue?`
+        : `Delete "${name}"?`
+
+        if (!confirm(message)) return
+
+        const res = await fetch(`${API_URL}/folders/${id}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${token}` }
+        })
+        if (!res.ok) throw new Error('Failed to delete folder')
+        showSuccess(`${name} deleted`)
+        onDelete()
     } catch {
-      showError(`Failed to delete ${name}`)
+        showError(`Failed to delete ${name}`)
     }
   }
 

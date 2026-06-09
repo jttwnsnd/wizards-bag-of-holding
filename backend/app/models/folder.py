@@ -15,5 +15,5 @@ class Folder(Base):
 
     owner = relationship("User", back_populates="folders")
     parent = relationship("Folder", remote_side="Folder.id", back_populates="children")
-    children = relationship("Folder", back_populates="parent")
-    files = relationship("File", back_populates="folder")
+    children = relationship("Folder", back_populates="parent", cascade="all, delete-orphan")
+    files = relationship("File", back_populates="folder", cascade="all, delete-orphan")
