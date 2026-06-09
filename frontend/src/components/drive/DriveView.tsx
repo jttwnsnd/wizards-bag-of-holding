@@ -102,6 +102,8 @@ export default function DriveView() {
               folders={folders}
               files={files}
               onFolderClick={navigateToFolder}
+              onFileDelete={refresh}
+              onFolderDelete={refresh}
             />
           )}
         </DropZone>

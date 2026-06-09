@@ -8,6 +8,7 @@ interface FileCardProps {
   name: string
   mimeType: string
   updatedAt: string
+  onDelete: () => void
 }
 
 function getFileIcon(mimeType: string): string {
@@ -19,9 +20,9 @@ function getFileIcon(mimeType: string): string {
   return '📝'
 }
 
-export default function FileCard({ id, name, mimeType, updatedAt }: FileCardProps) {
+export default function FileCard({ id, name, mimeType, updatedAt, onDelete }: FileCardProps) {
   const { token } = useAuth()
-  const { showError } = useToast()
+  const { showError, showSuccess } = useToast()
 
   const handleDownload = async (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -37,24 +38,44 @@ export default function FileCard({ id, name, mimeType, updatedAt }: FileCardProp
     }
   }
 
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (!confirm(`Delete "${name}"?`)) return
+    try {
+      const res = await fetch(`${API_URL}/files/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (!res.ok) throw new Error('Failed to delete file')
+      showSuccess(`${name} deleted`)
+      onDelete()
+    } catch {
+      showError(`Failed to delete ${name}`)
+    }
+  }
+
   return (
     <div className="group flex flex-col bg-gray-800 hover:bg-gray-700 border border-gray-700 hover:border-gray-500 rounded-xl p-4 cursor-pointer transition-all duration-150">
-      {/* Icon */}
       <div className="text-4xl mb-3">{getFileIcon(mimeType)}</div>
-
-      {/* Name */}
       <p className="text-sm text-white font-medium truncate mb-1">{name}</p>
-
-      {/* Meta + download */}
       <div className="flex items-center justify-between mt-auto pt-1">
         <p className="text-xs text-gray-500">{updatedAt}</p>
-        <button
-          onClick={handleDownload}
-          className="opacity-0 group-hover:opacity-100 text-xs text-gray-400 hover:text-violet-400 transition-all duration-150"
-          title="Download"
-        >
-          ⬇️
-        </button>
+        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-150">
+          <button
+            onClick={handleDownload}
+            className="text-xs text-gray-400 hover:text-violet-400 transition-colors"
+            title="Download"
+          >
+            ⬇️
+          </button>
+          <button
+            onClick={handleDelete}
+            className="text-xs text-gray-400 hover:text-red-400 transition-colors"
+            title="Delete"
+          >
+            🗑️
+          </button>
+        </div>
       </div>
     </div>
   )

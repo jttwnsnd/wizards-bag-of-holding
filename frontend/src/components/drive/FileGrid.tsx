@@ -18,9 +18,11 @@ interface FileGridProps {
   folders: Folder[]
   files: File[]
   onFolderClick: (folderId: string, folderName: string) => void
+  onFileDelete: () => void
+  onFolderDelete: () => void
 }
 
-export default function FileGrid({ folders, files, onFolderClick }: FileGridProps) {
+export default function FileGrid({ folders, files, onFolderClick, onFileDelete, onFolderDelete }: FileGridProps) {
   const isEmpty = folders.length === 0 && files.length === 0
 
   if (isEmpty) {
@@ -38,8 +40,10 @@ export default function FileGrid({ folders, files, onFolderClick }: FileGridProp
       {folders.map(folder => (
         <FolderCard
           key={folder.id}
+          id={folder.id}
           name={folder.name}
           onClick={() => onFolderClick(folder.id, folder.name)}
+          onDelete={onFolderDelete}
         />
       ))}
       {files.map(file => (
@@ -49,6 +53,7 @@ export default function FileGrid({ folders, files, onFolderClick }: FileGridProp
           name={file.name}
           mimeType={file.mime_type}
           updatedAt={file.created_at}
+          onDelete={onFileDelete}
         />
       ))}
     </div>
