@@ -20,7 +20,7 @@ export default function NewFolderModal({ parentFolderId, onSuccess, onClose }: N
     if (!name.trim()) return
     setLoading(true)
     try {
-      const res = await fetch(`${API_URL}/folders`, {
+      const res = await fetch(`${API_URL}/folders/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
